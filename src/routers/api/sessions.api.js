@@ -17,6 +17,9 @@ sessionsRouter.post("/login",
 sessionsRouter.post("/signout", signout)
 sessionsRouter.post("/online", online)
 
+
+export default sessionsRouter
+
 async function register (req, res, next) {
     try {
         const data = req.body
@@ -62,5 +65,3 @@ async function online(req, res, next) {
     }
 }
 
-
-export default sessionsRouter

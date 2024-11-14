@@ -31,9 +31,9 @@ class Manager {
         }
     }
 
-    read = async () => {
+    read = async (data) => {
         try {
-            const all = await this.model.find().lean()
+            const all = await this.model.find(data).lean()
             return all
         } catch (error) {
             throw error
@@ -52,6 +52,7 @@ class Manager {
 
     destroy = async (id) => {
         try {
+            const opt = { new: true }
             const one = await this.model.findByIdAndDelete(id)
             return one
         } catch (error) {
