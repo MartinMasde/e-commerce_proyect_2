@@ -9,9 +9,15 @@ import pathHandler from "./src/middlewares/pathHandler.mid.js";
 import errorHandler from "./src/middlewares/errorHandler.mid.js";
 import dbConnect from "./src/utils/dbConnect.util.js";
 
+import cors from 'cors';
+
 
 //  Server
 const server = express();
+
+// Cors
+server.use(cors());
+
 const port = process.env.PORT;
 const ready = () => {
   console.log(`Server running on port ${port}`);
@@ -23,6 +29,7 @@ server.listen(port, ready);
 // Middlewares para manejo de json
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+server.use(express.static("public"));
 // Middleware para manejo de morgan
 server.use(morgan("dev"));
 // Middleware para manejo de cookies
