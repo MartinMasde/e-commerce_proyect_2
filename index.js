@@ -8,15 +8,12 @@ import indexRouter from "./src/routers/index.router.js";
 import pathHandler from "./src/middlewares/pathHandler.mid.js";
 import errorHandler from "./src/middlewares/errorHandler.mid.js";
 import dbConnect from "./src/utils/dbConnect.util.js";
-
 import cors from 'cors';
-
 
 //  Server
 const server = express();
 
-// Cors
-server.use(cors());
+server.use(cors()); // CORS para permitir peticiones desde cualquier origen - peticion desde el front ecommerce-frontend
 
 const port = process.env.PORT;
 const ready = () => {
@@ -25,23 +22,12 @@ const ready = () => {
 }
 server.listen(port, ready);
 
-
-// Middlewares para manejo de json
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
-server.use(express.static("public"));
-// Middleware para manejo de morgan
-server.use(morgan("dev"));
-// Middleware para manejo de cookies
-server.use(cookieParser(process.env.SECRET_KEY));
-
-// Middleware para manejo de sesiones
-// server.use(session({
-//   secret: process.env.SECRET_KEY,
-//   resave: true,
-//   saveUninitialized: true,
-//   cookie: { maxAge: 60000 }
-// }));
+// Middlewares 
+server.use(express.json()); // Manejo de json
+server.use(express.urlencoded({ extended: true })); // Manejo de formularios
+// server.use(express.static("public")); // Manejo de archivos estaticos
+server.use(morgan("dev")); // Manejo de Morgan para logs
+server.use(cookieParser(process.env.SECRET_KEY)); // Manejo de cookies
 
 // Configuracion de session con mongo storage
 server.use(session({
