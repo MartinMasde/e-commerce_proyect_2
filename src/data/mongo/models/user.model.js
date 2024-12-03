@@ -1,17 +1,18 @@
+import { hash } from "bcrypt";
 import { model, Schema } from "mongoose";
 
 const collection = "users"
-// ingles
-// plural
-// minusculas
-// representativo del recurso
+
 const schema = new Schema({
-    name: { type: String },
+    first_name: { type: String },
+    last_name: { type: String },
     email: { type: String, required: true, index: true, unique: true },
+    age: { type: Number },
     password: { type: String, required: true },
+    cart: { type: Schema.Types.ObjectId, ref: 'carts'},
     role: { type: String, default: 'USER', enum: ['USER','ADMIN','PREM'] },
-    verifyUser: { type: Boolean, default: false },
-    verifyCode: { type: String, default: "1234" }
+    isOnline: { type: Boolean, default: false }
+
 })
 
 const User = model(collection, schema)
