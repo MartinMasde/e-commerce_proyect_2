@@ -1,9 +1,5 @@
 import CustomRouter from "../../utils/CustomRouter.util.js";
 import { create, read, update, destroy } from "../../data/mongo/managers/products.manager.js";
-import passportCb from "../../middlewares/passportCb.mid.js";
-import isAdmin from '../../middlewares/isAdmin.mid.js';
-import verifyToken from '../../middlewares/verifyToken.mid.js';
-
 
 class ProductsApiRouter extends CustomRouter {
     constructor() {
@@ -11,7 +7,7 @@ class ProductsApiRouter extends CustomRouter {
       this.init();
     }
     init = () => {
-        this.create("/", ["ADMIN"], createProduct) // ver si funciona asi o hay que cambiarlo por la otra forma
+        this.create("/", ["ADMIN"], createProduct)
         this.read("/", ["PUBLIC"], readProducts)
         this.update("/:id", ["ADMIN"],  updateProduct)
         this.destroy("/:id", ["ADMIN"], destroyProduct)
