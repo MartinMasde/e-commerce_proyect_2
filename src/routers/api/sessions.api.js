@@ -53,8 +53,11 @@ async function online(req, res, next) {
     }
 }
 
+// funcion para redirigir al frontend con el token de google luego de la autenticación
 async function google(req, res, next) {
-    return res.status(200).json({ message: "USER LOGGED IN WITH GOOGLE", token: req.token });
+  const token = req.token;
+  const frontendUrl = `http://localhost:3000/login?googleAuth=true&token=${token}`;
+  return res.redirect(frontendUrl);
 }
 
 async function onlineToken(req, res, next) {
