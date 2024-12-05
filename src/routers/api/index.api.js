@@ -2,7 +2,7 @@ import CustomRouter from "../../utils/CustomRouter.util.js";
 import productsApiRouter from "./products.api.js";
 import cartsApiRouter from "./carts.api.js";
 import usersApiRouter from "./users.api.js";
-import sessionsRouter from "./sessions.api.js";
+import sessionsApiRouter from "./sessions.api.js";
 
 class ApiRouter extends CustomRouter {
     constructor() {
@@ -10,10 +10,10 @@ class ApiRouter extends CustomRouter {
       this.init();
     }
     init = () => {
-        this.use("/products", productsApiRouter)
-        this.use("/carts", cartsApiRouter)
-        this.use("/users", usersApiRouter)
-        this.use("/sessions", sessionsRouter)
+        this.use("/products", ["PUBLIC"], productsApiRouter);
+        this.use("/carts", ["PUBLIC"], cartsApiRouter);
+        this.use("/users", ["PUBLIC"], usersApiRouter);
+        this.use("/sessions", ["PUBLIC"], sessionsApiRouter);
     }
 }
 

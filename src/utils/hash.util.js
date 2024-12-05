@@ -1,4 +1,4 @@
-import { genSalt, hashSync, compareSync, genSaltSync } from "bcrypt";
+import { hashSync, compareSync, genSaltSync } from "bcrypt";
 
 function createHashUtil(password) {
     const salt = genSaltSync(10);

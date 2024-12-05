@@ -1,4 +1,3 @@
-import { hash } from "bcrypt";
 import { model, Schema } from "mongoose";
 
 const collection = "users"
@@ -10,7 +9,7 @@ const schema = new Schema({
     age: { type: Number },
     password: { type: String, required: true },
     cart: { type: Schema.Types.ObjectId, ref: 'carts'},
-    role: { type: String, default: 'USER', enum: ['USER','ADMIN','PREM'] },
+    role: { type: String, enum: ['USER','ADMIN'], default: 'USER' },
     isOnline: { type: Boolean, default: false }
 
 })

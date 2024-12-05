@@ -8,13 +8,12 @@ class SessionsApiRouter extends CustomRouter {
     this.init();
   }
   init = () => {
-    this.create("/register", passportCb("register"), register);
-    this.create("/login", passportCb("login"), login);
-    this.create("/signout", passportCb("signout"), signout);
-    this.create("/online", passportCb("online"), onlineToken);
-    this.read("/google", passportCb("google", { scope: ["email", "profile"] })); // autenticación con google
-    this.read("/google/callback", passportCb("google"), google); // estrategia de passport para google para login
-    this.read("/current", passportCb("current"), current);
+    this.create("/register", ["PUBLIC"], passportCb("register"), register);
+    this.create("/login", ["PUBLIC"], passportCb("login"), login);
+    this.create("/signout", ["USER", "ADMIN"], signout);
+    this.create("/online", ["USER", "ADMIN"], onlineToken);
+    this.read("/google", ["PUBLIC"], passportCb("google", { scope: ["email", "profile"] })); // autenticación con google
+    this.read("/google/callback", ["PUBLIC"], passportCb("google"), google); // estrategia de passport para google para login
   };
 }
 
@@ -65,11 +64,3 @@ async function onlineToken(req, res, next) {
     });
   }
 
-async function current(req, res, next) {
-    const user = req.user;
-    if(!user){
-      message = "NO USER LOGGED IN"
-      return res.json401(message);
-    }
-    return res.json200(user, "USER LOGGED IN");
-  }

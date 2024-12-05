@@ -1,5 +1,8 @@
 import CustomRouter from "../../utils/CustomRouter.util.js";
 import { create, read, update, destroy } from "../../data/mongo/managers/products.manager.js";
+import passportCb from "../../middlewares/passportCb.mid.js";
+import isAdmin from '../../middlewares/isAdmin.mid.js';
+import verifyToken from '../../middlewares/verifyToken.mid.js';
 
 
 class ProductsApiRouter extends CustomRouter {
@@ -8,10 +11,10 @@ class ProductsApiRouter extends CustomRouter {
       this.init();
     }
     init = () => {
-        this.create("/", createProduct)
-        this.read("/", readProducts)
-        this.update("/:id", updateProduct)
-        this.destroy("/:id", destroyProduct)
+        this.create("/", ["ADMIN"], createProduct) // ver si funciona asi o hay que cambiarlo por la otra forma
+        this.read("/", ["PUBLIC"], readProducts)
+        this.update("/:id", ["ADMIN"],  updateProduct)
+        this.destroy("/:id", ["ADMIN"], destroyProduct)
     }
 }
 
@@ -22,23 +25,35 @@ async function createProduct(req, res) {
         const message = "PRODUCT CREATED"
         const data = req.body
         const response = await create(data)
-        return res.status(201).json({ response, message })
+        return res.json201(response, message);
 }
+
 async function readProducts(req, res) {
         const message = "PRODUCTS FOUND"
         const response = await read()
-        return res.status(200).json({ response, message })
+        if (response.length > 0) {
+                return res.json200(response, message);
+              }
+              return res.json404();
 }
+
 async function updateProduct(req, res) {
         const { id } = req.params
         const data = req.body
         const message = "PRODUCT UPDATED"
         const response = await update(id, data)
-        return res.status(200).json({ response, message })
+        if (response) {
+                return res.json200(response, message);
+              }
+              return res.json404();
 }
+
 async function destroyProduct(req, res) {
         const { id } = req.params
         const message = "PRODUCT DELETED"
         const response = await destroy(id)
-        return res.status(200).json({ response, message })
+        if (response) {
+                return res.json200(response, message);
+              }
+              return res.json404();
 }
