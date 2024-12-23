@@ -1,3 +1,4 @@
+import { verify } from "crypto";
 import { model, Schema } from "mongoose";
 
 const collection = "users"
@@ -10,7 +11,9 @@ const schema = new Schema({
     password: { type: String, required: true },
     cart: { type: Schema.Types.ObjectId, ref: 'carts'},
     role: { type: String, enum: ['USER','ADMIN'], default: 'USER' },
-    isOnline: { type: Boolean, default: false }
+    isOnline: { type: Boolean, default: false },
+    verifyCode: { type: String, required: true }, // Codigo de verificacion de email
+    verify: { type: Boolean, default: false } // Estado de verificacion de email
 
 })
 

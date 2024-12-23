@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
-const { SECRET_KEY } = process.env
+import envUtil from "./env.util.js"
+const { SECRET_KEY } = envUtil
 
 function createTokenUtil(data) {
     const token = jwt.sign(

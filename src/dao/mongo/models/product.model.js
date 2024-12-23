@@ -4,7 +4,7 @@ const collection = "products"
  
 const schema = new Schema({
     title: { type: String, required: true, index: true },
-    photo: { type: String, default: "path/to/default/image.jpg" },
+    photo: { type: String, default: "" },
     price: { type: Number, default: 1 },
     stock: { type: Number, default: 1 },
     category: { type: String, enum: ["televisores", "audio", "heladeras"], default: "televisores"},

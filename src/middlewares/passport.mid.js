@@ -1,11 +1,13 @@
 import passport from "passport";
+import crypto from "crypto";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import { create, readByEmail, readById, update,} from "../data/mongo/managers/users.manager.js";
+import { create, readByEmail, readById, update,} from "../dao/mongo/managers/users.manager.js";
 import { createHashUtil, verifyHashUtil } from "../utils/hash.util.js";
 import { createTokenUtil, verifyTokenUtil } from "../utils/token.util.js";
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = process.env;
+import envUtil from "../utils/env.util.js";
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = envUtil;
 
 passport.use(
   "register",
@@ -19,11 +21,14 @@ passport.use(
           return done(null, false, info);
         }
         const hashedPassword = createHashUtil(password);
+        const verifyCode = crypto.randomBytes(16).toString("hex");
         const user = await create({
           email,
           password: hashedPassword,
           name: req.body.name || "Default Name",
+          verifyCode
         });
+        await sendVerifyEmail({ to: email, verifyCode: verifyCode });
         return done(null, user);
       } catch (error) {
         return done(error);
@@ -67,7 +72,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => req?.cookies?.token]),
-      secretOrKey: process.env.SECRET_KEY,
+      secretOrKey: envUtil.SECRET_KEY,
     },
     async (data, done) => {
       try {
@@ -90,7 +95,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => req?.cookies?.token]),
-      secretOrKey: process.env.SECRET_KEY,
+      secretOrKey: envUtil.SECRET_KEY,
     },
     async (data, done) => {
       try {
@@ -114,7 +119,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => req?.cookies?.token]),
-      secretOrKey: process.env.SECRET_KEY,
+      secretOrKey: envUtil.SECRET_KEY,
     },
     async (data, done) => {
       try {
