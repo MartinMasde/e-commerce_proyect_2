@@ -1,22 +1,46 @@
-import { verify } from "crypto";
+// import { verify } from "crypto";
+// import { model, Schema } from "mongoose";
+
+// const collection = "users"
+
+// const schema = new Schema({
+//     first_name: { type: String },
+//     last_name: { type: String },
+//     email: { type: String, required: true, index: true, unique: true },
+//     age: { type: Number },
+//     password: { type: String, required: true },
+//     cart: { type: Schema.Types.ObjectId, ref: 'carts'},
+//     role: { type: String, enum: ['USER','ADMIN'], default: 'USER' },
+//     isOnline: { type: Boolean, default: false },
+//     verifyCode: { type: String, required: true }, // Codigo de verificacion de email
+//     verify: { type: Boolean, default: false } // Estado de verificacion de email
+
+// })
+
+// const User = model(collection, schema)
+// export default User
+
+
 import { model, Schema } from "mongoose";
 
-const collection = "users"
+const collection = "users";
 
 const schema = new Schema({
-    first_name: { type: String },
-    last_name: { type: String },
-    email: { type: String, required: true, index: true, unique: true },
-    age: { type: Number },
-    password: { type: String, required: true },
-    cart: { type: Schema.Types.ObjectId, ref: 'carts'},
-    role: { type: String, enum: ['USER','ADMIN'], default: 'USER' },
-    isOnline: { type: Boolean, default: false },
-    verifyCode: { type: String, required: true }, // Codigo de verificacion de email
-    verify: { type: Boolean, default: false } // Estado de verificacion de email
+  first_name: { type: String },
+  last_name: { type: String },
+  email: { type: String, required: true, index: true, unique: true },
+  age: { type: Number },
+  password: { type: String },
+  cart: { type: Schema.Types.ObjectId, ref: "carts" },
+  role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
+  isOnline: { type: Boolean, default: false },
+  verifyCode: { 
+    type: String, 
+    required: function () { return !this.googleId; } // No requerido si googleId está presente 
+  },
+  verify: { type: Boolean, default: false }, // Estado de verificación de email
+  googleId: { type: String }, // ID del usuario autenticado con Google
+});
 
-})
-
-const User = model(collection, schema)
-export default User
-
+const User = model(collection, schema);
+export default User;
