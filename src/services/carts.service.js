@@ -12,8 +12,11 @@ class CartsService {
   destroyService = async (id) => await destroy(id);
 }
 
+export default CartsService;
+
 const service = new CartsService();
 const { createService, readService, updateService, destroyService } = service;
+
 export { createService, readService, updateService, destroyService };
 
 // async function createService(data) {

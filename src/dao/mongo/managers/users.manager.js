@@ -5,3 +5,4 @@ const usersManager = new Manager(User)
 const { create, read, readByEmail, readById, update, destroy } = usersManager
 
 export { create, read, readByEmail, readById, update, destroy }
+

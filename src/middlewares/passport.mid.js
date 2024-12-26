@@ -7,7 +7,8 @@ import { create, readByEmail, readById, update,} from "../dao/mongo/managers/use
 import { createHashUtil, verifyHashUtil } from "../utils/hash.util.js";
 import { createTokenUtil, verifyTokenUtil } from "../utils/token.util.js";
 import envUtil from "../utils/env.util.js";
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = envUtil;
+import { sendVerifyEmail } from "../utils/nodemailer.util.js";
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL, SECRET_KEY } = envUtil;
 
 passport.use(
   "register",
@@ -21,7 +22,7 @@ passport.use(
           return done(null, false, info);
         }
         const hashedPassword = createHashUtil(password);
-        const verifyCode = crypto.randomBytes(16).toString("hex");
+        const verifyCode = crypto.randomBytes(12).toString("hex");
         const user = await create({
           email,
           password: hashedPassword,
@@ -46,6 +47,10 @@ passport.use(
         const user = await readByEmail(email);
         if (!user) {
           const info = { message: "USER NOT FOUND", statusCode: 401 };
+          return done(null, false, info);
+        }
+        if (!user.verify) {
+          const info = { message: "Please verify your account ", statusCode: 401 };
           return done(null, false, info);
         }
         const passwordForm = password;
@@ -168,3 +173,4 @@ passport.use(
 );
 
 export default passport;
+

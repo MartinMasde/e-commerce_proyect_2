@@ -21,5 +21,3 @@ class SessionsApiRouter extends CustomRouter {
 let sessionsRouter = new SessionsApiRouter();
 export default sessionsRouter.getRouter();
 
-
-

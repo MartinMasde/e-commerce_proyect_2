@@ -43,6 +43,7 @@ class CustomRouter {
       ) {
         const user = await readById(user_id);
         if (!user) return res.json401();
+        if (!user.verify) return res.json401().json({ message: "Please verify your email" }); // controlar la verificación de email
         req.user = user;
         return next();
       }

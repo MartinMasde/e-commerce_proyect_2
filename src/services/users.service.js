@@ -3,6 +3,7 @@ import {
   read,
   update,
   destroy,
+  readByEmail,
 } from "../dao/mongo/managers/users.manager.js";
 
 class UserService {
@@ -10,9 +11,14 @@ class UserService {
     readService = async () => await read();
     updateService = async (id, data) => await update(id, data);
     destroyService = async (id) => await destroy(id);
+    readByEmailService = async (email) => await readByEmail(email);
 }
 
-const service = new UserService();
-const { createService, readService, updateService, destroyService } = service;
+export default UserService;
 
-export { createService, readService, updateService, destroyService };
+const service = new UserService();
+const { createService, readService, updateService, destroyService, readByEmailService } = service;
+
+export { createService, readService, updateService, destroyService, readByEmailService };
+
+

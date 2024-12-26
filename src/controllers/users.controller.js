@@ -29,3 +29,4 @@ async function destroyUser(req, res) {
 }
 
 export { createUser, readUsers, updateUser, destroyUser };
+

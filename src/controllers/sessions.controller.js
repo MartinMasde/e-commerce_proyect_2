@@ -1,4 +1,5 @@
 import { readById } from "../dao/mongo/managers/users.manager.js";
+import { verifyUser } from "../services/sessions.service.js";
 
 async function register(req, res, next) {
   const { _id } = req.user;
@@ -49,16 +50,52 @@ async function onlineToken(req, res, next) {
   });
 }
 
+// async function verifyEmail(req, res) {
+//   const { email, verifyCodeFromClient } = req.body;
+//   // if (!email || !verifyCodeFromClient) {
+//   //   return res.status(400).json({ message: "Missing email or verification code" });
+//   // }
+//   const response = await verifyUser(email, verifyCodeFromClient);
+//   if (response) {
+//     const message = "Email verified!";
+//     return res.json200('OK', message);
+//   } else {
+//     return res.json401()
+//   }
+// }
+
+// async function verifyEmail(req, res) {
+//   const { email, verifyCode } = req.body;
+//   const response = await verifyUser(email, verifyCode);
+//   if (response) {
+//     const message = "Email verified!";
+//     return res.json200("OK", message);
+//   } else {
+//     return res.json401();
+//   }
+// }
+
+
 async function verifyEmail(req, res) {
-  const { verifyCodeFromClient } = req.body;
-  const response = await verify(verifyCodeFromClient)
-  if (response) {
-    const message = "Email verified!";
-    return res.json200('OK', message);
-  } else {
-    return res.json401();
+  const { email, verifyCode } = req.body;
+
+  if (!email || !verifyCode) {
+    return res.status(400).json({ error: "Missing email or verification code" });
+  }
+
+  try {
+    const isVerified = await verifyUser(email, verifyCode);
+    if (isVerified) {
+      return res.json({ message: "Email verified successfully!" });
+    } else {
+      return res.status(401).json({ error: "Verification failed." });
+    }
+  } catch (error) {
+    console.error("Error in verifyEmail:", error);
+    return res.status(500).json({ error: "Internal server error." });
   }
 }
 
 
 export { register, login, signout, online, google, onlineToken, verifyEmail }; 
+
