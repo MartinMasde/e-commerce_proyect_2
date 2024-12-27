@@ -59,7 +59,6 @@ class Manager {
             throw error
         }
     }
-
 }
 
 export default Manager

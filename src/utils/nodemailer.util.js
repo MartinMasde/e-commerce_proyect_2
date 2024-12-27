@@ -12,6 +12,7 @@ const transport = createTransport({
     pass: GOOGLE_PASSWORD,
   },
 });
+
 // Función para enviar email de verificación de cuenta
 const sendVerifyEmail = async ({ to, verifyCode }) => {
   try {
@@ -34,22 +35,22 @@ const sendVerifyEmail = async ({ to, verifyCode }) => {
 };
 
 // Funcion para resetear el password
-// const sendResetPasswordEmail = async ({ to, resetCode }) => {
-//     try {
-//         await transport.verify()
-//         await transport.sendMail({
-//             from: GOOGLE_EMAIL,
-//             to,
-//             subject: "Reset your password",
-//             html:  `
-//                 <h1 style="color: red">Reset your password</h1>
-//                 <p>Reset code: ${resetCode}</p>
-//         `,
-//         });
+const sendResetPasswordEmail = async ({ to, resetCode }) => {
+    try {
+        await transport.verify()
+        await transport.sendMail({
+            from: GOOGLE_EMAIL,
+            to,
+            subject: "Reset your password",
+            html:  `
+                <h1 style="color: red">Reset your password</h1>
+                <p>Reset code: ${resetCode}</p>
+        `,
+        });
 
-//     } catch (error) {
-//         throw error;
-//     }
-// }
+    } catch (error) {
+        throw error;
+    }
+}
 
-export { sendVerifyEmail };
+export { sendVerifyEmail, sendResetPasswordEmail };

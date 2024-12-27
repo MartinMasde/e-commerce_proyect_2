@@ -1,5 +1,13 @@
-import { readById } from "../dao/mongo/managers/users.manager.js";
 import { verifyUser } from "../services/sessions.service.js";
+
+import crypto from "crypto";
+import {
+  readById,
+  update,
+  readByEmail,
+} from "../dao/mongo/managers/users.manager.js";
+import { sendResetPasswordEmail } from "../utils/nodemailer.util.js";
+import { createHashUtil } from "../utils/hash.util.js";
 
 async function register(req, res, next) {
   const { _id } = req.user;
@@ -8,11 +16,9 @@ async function register(req, res, next) {
 }
 
 async function login(req, res, next) {
-  // const { token } = req.user;
   const { token, role } = req.user;
   const opts = { maxAge: 60 * 60 * 24 * 7, httpOnly: true };
   const message = "User logged in!";
-  // const response = "OK";
   const response = { token, role };
   return res.cookie("token", token, opts).json200(response, message);
 }
@@ -50,39 +56,15 @@ async function onlineToken(req, res, next) {
   });
 }
 
-// async function verifyEmail(req, res) {
-//   const { email, verifyCodeFromClient } = req.body;
-//   // if (!email || !verifyCodeFromClient) {
-//   //   return res.status(400).json({ message: "Missing email or verification code" });
-//   // }
-//   const response = await verifyUser(email, verifyCodeFromClient);
-//   if (response) {
-//     const message = "Email verified!";
-//     return res.json200('OK', message);
-//   } else {
-//     return res.json401()
-//   }
-// }
-
-// async function verifyEmail(req, res) {
-//   const { email, verifyCode } = req.body;
-//   const response = await verifyUser(email, verifyCode);
-//   if (response) {
-//     const message = "Email verified!";
-//     return res.json200("OK", message);
-//   } else {
-//     return res.json401();
-//   }
-// }
-
-
+// Funcion para verificar el email del usuario
 async function verifyEmail(req, res) {
   const { email, verifyCode } = req.body;
 
   if (!email || !verifyCode) {
-    return res.status(400).json({ error: "Missing email or verification code" });
+    return res
+      .status(400)
+      .json({ error: "Missing email or verification code" });
   }
-
   try {
     const isVerified = await verifyUser(email, verifyCode);
     if (isVerified) {
@@ -96,6 +78,64 @@ async function verifyEmail(req, res) {
   }
 }
 
+// Funcion para solicitar el reseteo de la contraseña
+async function requestPasswordReset(req, res) {
+  const { email } = req.body;
 
-export { register, login, signout, online, google, onlineToken, verifyEmail }; 
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+  try {
+    const user = await readByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
+    const resetCode = crypto.randomBytes(6).toString("hex");
+    const resetCodeExpiration = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    await update(user._id, { resetCode, resetCodeExpiration });
+
+    await sendResetPasswordEmail({ to: email, resetCode });
+
+    return res.status(200).json({ message: "Reset code sent to your email" });
+  } catch (error) {
+    console.error("Error in requestPasswordReset:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Funcion para resetear la contraseña
+async function resetPassword(req, res) {
+  const { email, resetCode, newPassword } = req.body;
+
+  if (!email || !resetCode || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const user = await readByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.resetCode !== resetCode || user.resetCodeExpiration < new Date()) {
+      return res.status(400).json({ error: "Invalid or expired reset code" });
+    }
+
+    const hashedPassword = createHashUtil(newPassword);
+
+    await update(user._id, {
+      password: hashedPassword,
+      resetCode: null,
+      resetCodeExpiration: null,
+    });
+
+    return res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export { register, login, signout, online, google, onlineToken, verifyEmail, requestPasswordReset, resetPassword};
