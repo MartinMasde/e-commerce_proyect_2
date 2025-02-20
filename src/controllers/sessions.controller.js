@@ -1,11 +1,13 @@
 import { verifyUser } from "../services/sessions.service.js";
 
 import crypto from "crypto";
-import {
-  readById,
-  update,
-  readByEmail,
-} from "../dao/mongo/managers/users.manager.js";
+// import {
+//   readById,
+//   update,
+//   readByEmail,
+// } from "../dao/mongo/managers/users.manager.js";
+import dao from "../dao/index.factory.js";
+const { UsersManager } = dao;
 import { sendResetPasswordEmail } from "../utils/nodemailer.util.js";
 import { createHashUtil } from "../utils/hash.util.js";
 
@@ -31,7 +33,7 @@ function signout(req, res, next) {
 
 async function online(req, res, next) {
   const { user_id } = req.session;
-  const user = await readById(user_id);
+  const user = await UsersManager.readById(user_id);
   if (req.session.user_id) {
     const message = user.email + " is online";
     const response = true;
@@ -86,7 +88,7 @@ async function requestPasswordReset(req, res) {
     return res.status(400).json({ error: "Email is required" });
   }
   try {
-    const user = await readByEmail(email);
+    const user = await UsersManager.readByEmail(email);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -94,7 +96,7 @@ async function requestPasswordReset(req, res) {
     const resetCode = crypto.randomBytes(6).toString("hex");
     const resetCodeExpiration = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
-    await update(user._id, { resetCode, resetCodeExpiration });
+    await UsersManager.update(user._id, { resetCode, resetCodeExpiration });
 
     await sendResetPasswordEmail({ to: email, resetCode });
 
@@ -114,7 +116,7 @@ async function resetPassword(req, res) {
   }
 
   try {
-    const user = await readByEmail(email);
+    const user = await UsersManager.readByEmail(email);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -125,7 +127,7 @@ async function resetPassword(req, res) {
 
     const hashedPassword = createHashUtil(newPassword);
 
-    await update(user._id, {
+    await UsersManager.update(user._id, {
       password: hashedPassword,
       resetCode: null,
       resetCodeExpiration: null,

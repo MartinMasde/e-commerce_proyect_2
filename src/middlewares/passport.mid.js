@@ -3,12 +3,14 @@ import crypto from "crypto";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-import { create, readByEmail, readById, update,} from "../dao/mongo/managers/users.manager.js";
+// import { create, readByEmail, readById, update,} from "../dao/mongo/managers/users.manager.js";
+import dao from "../dao/index.factory.js";
 import { createHashUtil, verifyHashUtil } from "../utils/hash.util.js";
 import { createTokenUtil, verifyTokenUtil } from "../utils/token.util.js";
 import envUtil from "../utils/env.util.js";
 import { sendVerifyEmail } from "../utils/nodemailer.util.js";
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL, SECRET_KEY } = envUtil;
+const { UsersManager } = dao;
 
 
 passport.use(
@@ -17,7 +19,7 @@ passport.use(
     { passReqToCallback: true, usernameField: "email" },
     async (req, email, password, done) => {
       try {
-        const existingUser = await readByEmail(email);
+        const existingUser = await UsersManager.readByEmail(email);
         if (existingUser) {
           const info = { message: "USER ALREADY EXISTS", statusCode: 401 };
           return done(null, false, info);
@@ -27,7 +29,7 @@ passport.use(
         const verifyCode = crypto.randomBytes(12).toString("hex");
 
         // Crear usuario
-        const user = await create({
+        const user = await UsersManager.create({
           email,
           password: hashedPassword,
           name: req.body.name || "Default Name",
@@ -52,7 +54,7 @@ passport.use(
     { usernameField: "email" },
     async (email, password, done) => {
       try {
-        const user = await readByEmail(email);
+        const user = await UsersManager.readByEmail(email);
 
         if (!user) {
           const info = { message: "USER NOT FOUND", statusCode: 401 };
@@ -83,7 +85,7 @@ passport.use(
         user.token = token;
 
         // Actualizar estado de conexión
-        await update(user._id, { isOnline: true });
+        await UsersManager.update(user._id, { isOnline: true });
 
         return done(null, user);
       } catch (error) {
@@ -107,7 +109,7 @@ passport.use(
           const info = { message: "NOT AUTHORIZE", statusCode: 403 };
           return done(null, false, info);
         }
-        const user = await readById(user_id);
+        const user = await UsersManager.readById(user_id);
         return done(null, user);
       } catch (error) {
         return done(error);
@@ -126,7 +128,7 @@ passport.use(
     async (data, done) => {
       try {
         const { user_id } = data;
-        const user = await readById(user_id);
+        const user = await UsersManager.readById(user_id);
         const { isOnline } = user;
         if (!isOnline) {
           const info = { message: "USER IS NOT ONLINE", statusCode: 401 };
@@ -150,7 +152,7 @@ passport.use(
     async (data, done) => {
       try {
         const { user_id } = data;
-        await update(user_id, { isOnline: false });
+        await UsersManager.update(user_id, { isOnline: false });
 
         return done(null, { user_id: null });
       } catch (error) {
@@ -176,10 +178,10 @@ passport.use(
         const email = emails[0].value;
         const picture = photos[0].value;
 
-        let user = await readByEmail(email);
+        let user = await UsersManager.readByEmail(email);
 
         if (!user) {
-          user = await create({
+          user = await UsersManager.create({
             email,
             googleId: id, // Guardar el ID de Google
             verify: true, // Usuarios de Google están verificados automáticamente

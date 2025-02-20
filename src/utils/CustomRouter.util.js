@@ -1,7 +1,9 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken"; // esto podria estar mal
-import { readById } from "../dao/mongo/managers/users.manager.js";
+import jwt from "jsonwebtoken"; 
+// import { readById } from "../dao/mongo/managers/users.manager.js";
 import envUtil from "./env.util.js";
+import dao from "../dao/index.factory.js";
+const { UsersManager } = dao;
 
 class CustomRouter {
   constructor() {
@@ -41,7 +43,7 @@ class CustomRouter {
         (policies.includes("USER") && role === "USER") ||
         (policies.includes("ADMIN") && role === "ADMIN")
       ) {
-        const user = await readById(user_id);
+        const user = await UsersManager.readById(user_id);
         if (!user) return res.json401();
         if (!user.verify) return res.json401().json({ message: "Please verify your email" }); // controlar la verificación de email
         req.user = user;
